@@ -39,6 +39,11 @@ func (dbConnection *DbConnection) CreateTables() error {
 	stmt, err := dbConnection.db.Prepare(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ("+
 		"activity_id INTEGER PRIMARY KEY,"+
 		"user_id INTEGER,"+
+		"start_time INTEGER,"+
+		"total_time REAL,"+
+		"total_distance REAL,"+
+		"avg_heart_rate INTEGER,"+
+		"avg_cadence INTEGER,"+
 		"data BLOB"+
 		");",
 		activityTableName))
@@ -52,11 +57,13 @@ func (dbConnection *DbConnection) CreateTables() error {
 
 func (dbConnection *DbConnection) AddActivity(activity *Activity) error {
 	stmt, err := dbConnection.db.Prepare(
-		fmt.Sprintf("INSERT INTO %s (user_id, data) VALUES(?, ?)", activityTableName))
+		fmt.Sprintf("INSERT INTO %s (user_id, start_time, total_time, total_distance, avg_heart_rate, avg_cadence, data) "+
+			"VALUES(?, ?, ?, ?, ?, ?, ?)", activityTableName))
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(activity.User.ID, activity.DataGlob)
+	res, err := stmt.Exec(activity.User.ID, activity.StartTime, activity.TotalTime, activity.Distance,
+		activity.AvgHeartRate, activity.AvgCadence, activity.DataGlob)
 	if err != nil {
 		return err
 	}
@@ -70,4 +77,28 @@ func (dbConnection *DbConnection) GetActivity(id uint) ([]byte, error) {
 	var result []byte
 	err := row.Scan(&result)
 	return result, err
+}
+
+func (dbConnection *DbConnection) GetActivitySummaries(start, end uint) []Activity {
+	queryString := fmt.Sprintf("SELECT start_time, total_time, total_distance, avg_heart_rate, avg_cadence "+
+		"FROM %s ORDER BY start_time DESC LIMIT %d OFFSET %d",
+		activityTableName, end, start) // TODO this isn't right
+
+	rows, err := dbConnection.db.Query(queryString)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer rows.Close()
+
+	activities := []Activity{}
+	for rows.Next() {
+		var activity Activity
+		err = rows.Scan(&activity.StartTime, &activity.TotalTime, &activity.Distance, &activity.AvgHeartRate, &activity.AvgCadence)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		activities = append(activities, activity)
+	}
+
+	return activities
 }

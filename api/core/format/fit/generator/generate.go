@@ -452,8 +452,42 @@ var conversionMultiplier map[Unit_e]map[Unit_e]float64
 
 func init() {
 	conversionMultiplier = make(map[Unit_e]map[Unit_e]float64)
+
 	conversionMultiplier[UNIT_SEMICIRCLES] = make(map[Unit_e]float64)
 	conversionMultiplier[UNIT_SEMICIRCLES][UNIT_DEGREES] = 180.0 / math.Pow(2, 31)
+
+	conversionMultiplier[UNIT_YEAR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_YEAR][UNIT_YEAR] = 1.0
+
+	conversionMultiplier[UNIT_HOUR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_HOUR][UNIT_HOUR] = 1.0
+
+	conversionMultiplier[UNIT_MINUTE] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_MINUTE][UNIT_MINUTE] = 1.0
+	
+	conversionMultiplier[UNIT_SECOND] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_SECOND][UNIT_SECOND] = 1.0
+
+	conversionMultiplier[UNIT_METER] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_METER][UNIT_METER] = 1.0
+/* TODO: ...
+
+
+	conversionMultiplier[UNIT_YEAR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_YEAR][UNIT_YEAR] = 1.0
+
+	conversionMultiplier[UNIT_YEAR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_YEAR][UNIT_YEAR] = 1.0
+
+	conversionMultiplier[UNIT_YEAR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_YEAR][UNIT_YEAR] = 1.0
+
+	conversionMultiplier[UNIT_YEAR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_YEAR][UNIT_YEAR] = 1.0
+
+	conversionMultiplier[UNIT_YEAR] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_YEAR][UNIT_YEAR] = 1.0
+	*/
 }
 
 func Convert(value interface{}, startUnit Unit, goalUnit Unit_e) float64 {
