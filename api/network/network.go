@@ -16,6 +16,8 @@ import (
 	"github.com/emurray647/run_log/core/format/fit"
 	"github.com/emurray647/run_log/core/format/fit/generated"
 	"github.com/emurray647/run_log/core/format/json"
+
+	"github.com/emurray647/run_log/model"
 	"github.com/gorilla/mux"
 )
 
@@ -60,19 +62,76 @@ func (info info) allActivities(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	fmt.Println(pageQuery, " ", numPerPageQuery)
+	// fmt.Println(pageQuery, " ", numPerPageQuery)
 
 	start := (pageQuery - 1) * numPerPageQuery
 	end := start + numPerPageQuery
-	activities := info.db.GetActivitySummaries(start, end)
+	// activities := info.db.GetActivitySummaries(start, end)
+	activities, err := info.db.GetActivities(start, end)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	// now unmarshal the data
+	sessions := make([]fit.DataMessage, 0)
+	summaries := make([]model.ActivitySummary, len(sessions))
+	for i := range activities {
+		messages := info.fr.Read(bytes.NewReader(activities[i].DataGlob), func(dm fit.DataMessage) bool {
+			return dm.GlobalMessageNum == generated.SessionDataMessageID
+		})
+		if len(messages) != 1 {
+			log.Fatalf("expected 1 session message; got %d", len(messages))
+		}
+		// sessions = append(sessions, messages[0])
+		summary := model.ActivitySummary{}
+		summary.ID = activities[i].ID
+		summary.Marshal(messages)
+		summaries = append(summaries, summary)
+	}
+
+	// // we have in sessions all the "summary" data needed to send over
+	// summaries := make([]model.ActivitySummary, len(sessions))
+	// for i := range sessions {
+	// 	session := sessions[i].Data.(*generated.SessionDataMessage)
+	// 	summary := model.ActivitySummary{}
+	// 	t, _ := time.Parse("2006-01-02 15:04:05", "1989-12-31 00:00:00")
+	// 	startTime := uint32(t.Unix()) + uint32(*session.StartTime)
+	// 	summary.StartTime = uint(startTime)
+	// 	summary.DurationSeconds = float32(generated.Convert(*session.TotalTimerTime, generated.SESSION_TOTAL_TIMER_TIME_DEFAULT_UNIT, generated.UNIT_SECOND))
+	// 	summary.Distance = float32(generated.Convert(*session.TotalDistance, generated.SESSION_TOTAL_DISTANCE_DEFAULT_UNIT, generated.UNIT_METER))
+	// 	summary.AvgHeartRate = uint(*session.AvgHeartRate)
+	// 	summary.AvgCadence = uint(*session.AvgCadence)
+	// 	summaries[i] = summary
+	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Println(r.Header.Get("origin"))
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.WriteHeader(http.StatusOK)
-	json_base.NewEncoder(w).Encode(activities)
+	json_base.NewEncoder(w).Encode(summaries)
 
 }
+
+// func (info info) activity(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/json")
+
+// 	vars := mux.Vars(r)
+// 	key, _ := strconv.Atoi(vars["id"])
+
+// 	b, err := info.db.GetActivity(uint(key))
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	messages := info.fr.Read(bytes.NewReader(b))
+
+// 	writer := json.JsonWriter{}
+// 	err = writer.Write(w, &fit.Activity{Messages: messages}, info.outFilterOpts...)
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+
+// }
 
 func (info info) activity(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -86,25 +145,23 @@ func (info info) activity(w http.ResponseWriter, r *http.Request) {
 	}
 	messages := info.fr.Read(bytes.NewReader(b))
 
-	writer := json.JsonWriter{}
-	err = writer.Write(w, &fit.Activity{Messages: messages}, info.outFilterOpts...)
-	if err != nil {
-		panic(err.Error())
-	}
+	activity := model.Activity{}
+	activity.Marshal(messages)
+
+	// writer := json.JsonWriter{}
+	// err = writer.Write(w, &fit.Activity{Messages: messages}, info.outFilterOpts...)
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Println(r.Header.Get("origin"))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.WriteHeader(http.StatusOK)
+	json_base.NewEncoder(w).Encode(activity)
 
 }
-
-// func (info info) helper(b []byte) {
-
-// 	messages := info.fr.Read(bytes.NewReader(b))
-
-// 	w := &bytes.Buffer{}
-// 	writer := json.JsonWriter{}
-// 	err := writer.Write(w, &fit.Activity{Messages: messages}, info.outFilterOpts...)
-// 	if err != nil {
-// 		panic(err.Error())
-// 	}
-// }
 
 func (info info) uploadActivity(w http.ResponseWriter, r *http.Request) {
 

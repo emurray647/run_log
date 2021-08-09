@@ -470,6 +470,9 @@ func init() {
 
 	conversionMultiplier[UNIT_METER] = make(map[Unit_e]float64)
 	conversionMultiplier[UNIT_METER][UNIT_METER] = 1.0
+
+	conversionMultiplier[UNIT_SECOND] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_SECOND][UNIT_SECOND] = 1.0
 /* TODO: ...
 
 
@@ -514,6 +517,7 @@ func Convert(value interface{}, startUnit Unit, goalUnit Unit_e) float64 {
 	case uint8:
 		startValue = float64(i)
 	default:
+		// startValue = float64(i)
 		panic(fmt.Errorf("error converting")) // TODO
 	}
 

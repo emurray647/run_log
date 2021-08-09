@@ -15,7 +15,7 @@ type FitReader struct {
 	bytesRead uint
 }
 
-func (fr *FitReader) Read(r io.Reader) []DataMessage {
+func (fr *FitReader) Read(r io.Reader, opts ...func(DataMessage) bool) []DataMessage {
 
 	fr.r = &r
 	fr.bytesRead = 0
@@ -31,6 +31,7 @@ func (fr *FitReader) Read(r io.Reader) []DataMessage {
 	for fr.bytesRead < uint(header.dataSize-uint32(header.size)-2) {
 		headerByte, err := fr.readRecordHeaderByte()
 		if err != nil {
+			// log.Fatalf(err.Error())
 			panic(err.Error())
 		}
 
@@ -42,7 +43,13 @@ func (fr *FitReader) Read(r io.Reader) []DataMessage {
 			dataMessage, _ := fr.readRecordDataMessage(headerByte, typeMap)
 
 			if generated.IsValidMessageID(dataMessage.GlobalMessageNum) {
-				messages = append(messages, dataMessage)
+				accept := true
+				for _, opt := range opts {
+					accept = accept && opt(dataMessage)
+				}
+				if accept {
+					messages = append(messages, dataMessage)
+				}
 			}
 
 			countMap[dataMessage.GlobalMessageNum] += 1

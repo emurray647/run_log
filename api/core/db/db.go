@@ -79,6 +79,39 @@ func (dbConnection *DbConnection) GetActivity(id uint) ([]byte, error) {
 	return result, err
 }
 
+func (dbConnection *DbConnection) GetActivities(start, end uint) ([]Activity, error) {
+	// func (dbConnection *DbConnection) GetActivities(start, end uint) ([][]byte, error) {
+	queryString := fmt.Sprintf("SELECT activity_id, data "+
+		"FROM %s ORDER BY start_time DESC LIMIT %d OFFSET %d",
+		activityTableName, end, start) // TODO this isn't right
+
+	rows, err := dbConnection.db.Query(queryString)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer rows.Close()
+
+	// activities := make([][]byte, 0)
+	activities := make([]Activity, 0)
+	for rows.Next() {
+		var id uint
+		var buffer []byte
+		// err = rows.Scan(&activity.StartTime, &activity.TotalTime, &activity.Distance, &activity.AvgHeartRate, &activity.AvgCadence)
+		err = rows.Scan(&id, &buffer)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		activity := Activity{
+			ID:       id,
+			DataGlob: buffer,
+		}
+		activities = append(activities, activity)
+	}
+
+	return activities, nil
+}
+
+// depricating
 func (dbConnection *DbConnection) GetActivitySummaries(start, end uint) []Activity {
 	queryString := fmt.Sprintf("SELECT start_time, total_time, total_distance, avg_heart_rate, avg_cadence "+
 		"FROM %s ORDER BY start_time DESC LIMIT %d OFFSET %d",
