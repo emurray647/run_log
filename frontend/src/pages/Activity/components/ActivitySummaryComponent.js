@@ -1,6 +1,6 @@
 import React from "react"
 
-import Preferences from "../util/Preferences"
+import Preferences from "../../../util/Preferences"
 
 class ActivitySummaryComponent extends React.Component {
 

@@ -52,6 +52,8 @@ class Preferences {
 
         return `${hourString}:${minString}:${secString}`
     }
+
+    
 }
 
 

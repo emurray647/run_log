@@ -1,7 +1,7 @@
 import React from "react"
-import Preferences from "../util/Preferences"
 
-import UnitConversion from "../util/UnitConversion"
+import Preferences from "../../util/Preferences"
+import UnitConversion from "../../util/UnitConversion"
 
 class ActivityList extends React.Component {
 

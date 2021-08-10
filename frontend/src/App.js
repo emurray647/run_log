@@ -5,8 +5,8 @@ import { Switch, Route, Link } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./components/Navbar";
-import ActivityList from "./components/ActivityList"
-import Activity from "./components/Activity"
+import ActivityList from "./pages/ActivityList/ActivityList"
+import Activity from "./pages/Activity/Activity"
 
 function App() {
     return (

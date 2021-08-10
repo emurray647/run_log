@@ -35,6 +35,31 @@ class UnitConversion {
         console.log(d)
         return d
     }
+
+    convertSpeedToPace(input) {
+        // input as m/s
+        // need min/{mile or km}
+        if (input == 0.0) {
+            return Math.Infinity;
+        }
+        const secondsPerMeter = 1.0 / input;
+        const minutesPerMeter = secondsPerMeter / 60;
+
+        let result = 0.0;
+        switch (Preferences.instance().getDistanceUnits()) {
+        case Preferences.DISTANCE_UNITS.MILES:
+            result = minutesPerMeter * UnitConversion.METERS_PER_MILE;
+            break;
+        case Preferences.DISTANCE_UNITS.KILOMETERS:
+            result = minutesPerMeter * 1000;
+            break;
+        default:
+            console.error("invalid pace conversion")
+        }
+
+        return result;
+
+    }
 }
 
 UnitConversion.instance = function() {

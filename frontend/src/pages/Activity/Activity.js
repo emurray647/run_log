@@ -1,8 +1,11 @@
 import React from "react"
 
-import ActivitySummaryComponent from "./ActivitySummaryComponent"
+import ActivitySummaryComponent from "./components/ActivitySummaryComponent"
+import LapSummary from "./components/LapSummary"
 
-import UnitConversion from "../util/UnitConversion"
+import UnitConversion from "../../util/UnitConversion"
+import Chart from "./components/Chart"
+import Graphs from "./components/Graphs"
 
 class Activity extends React.Component {
     
@@ -36,8 +39,14 @@ class Activity extends React.Component {
         return (
             <div>
                 {this.state.loaded ? 
-                   <ActivitySummaryComponent data={this.state.summary}/> :
-                   <h1>Loading</h1>
+                    <div> 
+                        <ActivitySummaryComponent data={this.state.summary}/>
+                        <LapSummary data={this.state.laps} />
+                        <Chart data={this.state.records} />
+                        <Graphs data={this.state.records} />
+                    </div>
+                    :
+                    <h1>Loading</h1>
                 }
 
             </div>
