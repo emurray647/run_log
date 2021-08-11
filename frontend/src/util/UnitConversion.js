@@ -32,7 +32,7 @@ class UnitConversion {
     convertEpochToDate(input) {
         let d = new Date(0);
         d.setUTCSeconds(input);
-        console.log(d)
+        // console.log(d)
         return d
     }
 

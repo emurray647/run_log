@@ -46,15 +46,15 @@ class Graphs extends React.Component {
 
         const channels = {
             distance: { units: "miles", label: "Distance", format: ",.1f", series: null, show: false },
-            altitude: { units: "feet", label: "Altitude", format: "d", series: null, show: false },
-            cadence: { units: "rpm", label: "Cadence", format: "d", series: null, show: true },
+            altitude: { units: "feet", label: "Altitude", format: "d", series: null, show: true },
+            cadence: { units: "spm", label: "Cadence", format: "d", series: null, show: true },
             heartrate: { units: "bpm", label: "Heart Rate", format: "d", series: null, show: true},
             speed: { units: "mph", label: "Speed", format: ",.1f", series: null, show: true },
             pace: { units: "min/mile", label: "Pace", format: ",.1f", series: null, show: true, formatter: minsToTimeString},
         };
 
         const channelNames = ["speed", "heartrate", "cadence", "altitude", "distance", "pace"];
-        const displayChannels = ["speed", "heartrate", "cadence", "pace"];
+        const displayChannels = ["heartrate", "cadence", "pace", "altitude"];
 
         this.state = {
             ready: false,
@@ -67,6 +67,8 @@ class Graphs extends React.Component {
         this.renderChart = this.renderChart.bind(this);
         this.renderBrush = this.renderBrush.bind(this);
         this.handleTrackerChanged = this.handleTrackerChanged.bind(this);
+        this.handleTimeRangeChange = this.handleTimeRangeChange.bind(this);
+        this.handleChartResize = this.handleChartResize.bind(this);
     }
 
     componentDidMount() {
@@ -87,7 +89,7 @@ class Graphs extends React.Component {
             points["speed"].push([time, data[i].speed])
             points["heartrate"].push([time, data[i].heartrate])
             points["cadence"].push([time, data[i].cadence])
-            points["altitude"].push([time, data[i].altitude])
+            points["altitude"].push([time, data[i].elevation])
             points["distance"].push([time, data[i].distance])
             points["pace"].push([time, UnitConversion.instance().convertSpeedToPace(data[i].speed)])
             
@@ -103,8 +105,10 @@ class Graphs extends React.Component {
             })
         
             channels[channelName].series = series;
-            channels[channelName].avg = parseInt(series.avg(channelName), 10)
-            channels[channelName].max = parseInt(series.max(channelName), 10)
+            // channels[channelName].avg = parseInt(series.avg(channelName), 10)
+            // channels[channelName].max = parseInt(series.max(channelName), 10)
+            channels[channelName].avg = parseFloat(series.avg(channelName))
+            channels[channelName].max = parseFloat(series.max(channelName))
         
         }
 
@@ -121,13 +125,29 @@ class Graphs extends React.Component {
             maxTime,
             minDuration,
             timerange: initialRange,
-            brushRange: initialRange,
+            brushrange: initialRange,
         })
 
     } // componentDidMount
 
     handleTrackerChanged(t) {
         this.setState({tracker: t});
+    }
+
+    handleTimeRangeChange(tr) {
+        const {channels} = this.state;
+
+        if (tr) {
+            this.setState({timerange: tr, brushrange: tr})
+        }
+        else {
+            console.error("No time range provided")
+        }
+    }
+
+    handleChartResize(width) {
+        this.setState({width});
+        console.log("Chart resize")
     }
 
     renderChart() {
@@ -168,9 +188,15 @@ class Graphs extends React.Component {
                 }
             }
 
+            const formatter = channels[channelName].formatter ?? (value => {
+                const string = value.toLocaleString('en-US', {
+                    maximumFractionDigits: 1,
+                })
+                return string
+            });
             const summary = [
-                { label: "Max", value: 0},
-                { label: "Avg", value: 0},
+                { label: "Max", value: formatter(channels[channelName].max)},
+                { label: "Avg", value: formatter(channels[channelName].avg)},
             ];
 
             rows.push(
@@ -214,8 +240,8 @@ class Graphs extends React.Component {
                 minTime={minTime}
                 minDuration={minDuration}
                 trackerPosition={this.state.tracker}
-                // onTimeRangeChanged={this.handleTimeRangeChange}
-                // onChartResize={width => this.handleChartResize(width)}
+                onTimeRangeChanged={this.handleTimeRangeChange}
+                onChartResize={width => this.handleChartResize(width)}
                 onTrackerChanged={this.handleTrackerChanged}
             >
                 {rows}
@@ -234,7 +260,7 @@ class Graphs extends React.Component {
             >
                 <ChartRow height="100" debug={false}>
                     <Brush
-                        timeRange={this.state.brushRange}
+                        timeRange={this.state.brushrange}
                         allowSelectionClear
                         onTimeRangeChanged={this.handleTimeRangeChange}
                     />

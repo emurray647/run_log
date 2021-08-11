@@ -92,8 +92,8 @@ func (a *Activity) Marshal(messages []fit.DataMessage) error {
 	}
 
 	// fmt.Println(points)
-	elevations, _ := util.GetElevations(&points)
-	for i := range a.Records {
+	elevations, _ := util.GetElevations(points)
+	for i := range elevations {
 		a.Records[i].Elevation = &elevations[i]
 	}
 
