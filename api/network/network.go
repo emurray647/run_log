@@ -148,12 +148,6 @@ func (info info) activity(w http.ResponseWriter, r *http.Request) {
 	activity := model.Activity{}
 	activity.Marshal(messages)
 
-	// writer := json.JsonWriter{}
-	// err = writer.Write(w, &fit.Activity{Messages: messages}, info.outFilterOpts...)
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
-
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Println(r.Header.Get("origin"))
 	w.Header().Set("Access-Control-Allow-Origin", "*")

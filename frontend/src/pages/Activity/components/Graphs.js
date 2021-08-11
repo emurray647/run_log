@@ -1,5 +1,8 @@
-import { TimeRange, TimeSeries } from "pondjs";
+import { TimeRange, TimeRangeEvent, TimeSeries } from "pondjs";
+
 import React from "react"
+import AreaChart from "react-timeseries-charts/lib/components/AreaChart";
+import Brush from "react-timeseries-charts/lib/components/Brush"
 import ChartContainer from "react-timeseries-charts/lib/components/ChartContainer";
 import ChartRow from "react-timeseries-charts/lib/components/ChartRow";
 import Charts from "react-timeseries-charts/lib/components/Charts"
@@ -7,7 +10,10 @@ import LabelAxis from "react-timeseries-charts/lib/components/LabelAxis";
 import LineChart from "react-timeseries-charts/lib/components/LineChart";
 import Resizable from "react-timeseries-charts/lib/components/Resizable";
 import ValueAxis from "react-timeseries-charts/lib/components/ValueAxis";
+import YAxis from "react-timeseries-charts/lib/components/YAxis";
 import styler from "react-timeseries-charts/lib/js/styler";
+
+import UnitConversion from "../../../util/UnitConversion";
 
 // much of this code was borrowed from 
 // https://github.com/esnet/react-timeseries-charts/blob/master/src/website/packages/charts/examples/cycling/Index.js
@@ -19,8 +25,20 @@ const style = styler([
     { key: "power", color: "green", width: 1, opacity: 0.5 },
     { key: "temperature", color: "#cfc793" },
     { key: "speed", color: "steelblue", width: 1, opacity: 0.5 },
+    { key: "pace", color: "steelblue", width: 1, opacity: 0.5 },
     { key: "heartrate", color: "steelblue", width: 1, opacity: 0.5 },
 ]);
+
+function minsToTimeString(input) {
+    const min = Math.floor(input);
+    const sec = (input - min) * 60;
+    const minString = min.toLocaleString('en-US', {minimumIntegerDigits: 2})
+    const secString = sec.toLocaleString('en-US', {
+        minimumIntegerDigits: 2,
+        maximumFractionDigits: 0,
+    })
+    return `${minString}:${secString}`
+}
 
 class Graphs extends React.Component {
     constructor(props) {
@@ -31,11 +49,12 @@ class Graphs extends React.Component {
             altitude: { units: "feet", label: "Altitude", format: "d", series: null, show: false },
             cadence: { units: "rpm", label: "Cadence", format: "d", series: null, show: true },
             heartrate: { units: "bpm", label: "Heart Rate", format: "d", series: null, show: true},
-            speed: { units: "mph", label: "Speed", format: ",.1f", series: null, show: true }
+            speed: { units: "mph", label: "Speed", format: ",.1f", series: null, show: true },
+            pace: { units: "min/mile", label: "Pace", format: ",.1f", series: null, show: true, formatter: minsToTimeString},
         };
 
-        const channelNames = ["speed", "heartrate", "cadence", "altitude", "distance"];
-        const displayChannels = ["speed", "heartrate", "cadence"];
+        const channelNames = ["speed", "heartrate", "cadence", "altitude", "distance", "pace"];
+        const displayChannels = ["speed", "heartrate", "cadence", "pace"];
 
         this.state = {
             ready: false,
@@ -46,6 +65,8 @@ class Graphs extends React.Component {
         };
 
         this.renderChart = this.renderChart.bind(this);
+        this.renderBrush = this.renderBrush.bind(this);
+        this.handleTrackerChanged = this.handleTrackerChanged.bind(this);
     }
 
     componentDidMount() {
@@ -68,8 +89,11 @@ class Graphs extends React.Component {
             points["cadence"].push([time, data[i].cadence])
             points["altitude"].push([time, data[i].altitude])
             points["distance"].push([time, data[i].distance])
+            points["pace"].push([time, UnitConversion.instance().convertSpeedToPace(data[i].speed)])
             
         }
+
+        console.log(points["speed"])
 
         for (let channelName of this.state.channelNames) {
             const series = new TimeSeries({
@@ -102,6 +126,10 @@ class Graphs extends React.Component {
 
     } // componentDidMount
 
+    handleTrackerChanged(t) {
+        this.setState({tracker: t});
+    }
+
     renderChart() {
         const {timerange, displayChannels, channels, maxTime, minTime, minDuration} = this.state;
 
@@ -124,6 +152,21 @@ class Graphs extends React.Component {
             );
 
             let value = "--";
+            if (this.state.tracker) {
+                const approx = 
+                    (+this.state.tracker - +timerange.begin()) /
+                    (+timerange.end() - +timerange.begin());
+                const ii = Math.floor(approx * series.size());
+                const i = series.bisect(new Date(this.state.tracker), ii);
+                const v = i < series.size() ? series.at(i).get(channelName) : null;
+                if (v) {
+                    // value = parseInt(v, 10);
+                    value = parseFloat(v, 10);
+                    if (channels[channelName].formatter) {
+                        value = channels[channelName].formatter(value);
+                    }
+                }
+            }
 
             const summary = [
                 { label: "Max", value: 0},
@@ -132,7 +175,7 @@ class Graphs extends React.Component {
 
             rows.push(
                 <ChartRow
-                    height="100"
+                    height="150"
                     visible={channels[channelName].show}
                     key={`row-${channelName}`}
                 >
@@ -144,7 +187,8 @@ class Graphs extends React.Component {
                         max={channels[channelName].max}
                         width={140}
                         type="linear"
-                        format=",.1f"
+                        // format=",.1f"
+                        format={channels[channelName].format}
                     />
                     <Charts>{charts}</Charts>
                     <ValueAxis
@@ -154,6 +198,7 @@ class Graphs extends React.Component {
                         width={80}
                         min={0}
                         max={35}
+                        format={channels[channelName].format}
                     />
                 </ChartRow>
             );
@@ -171,15 +216,49 @@ class Graphs extends React.Component {
                 trackerPosition={this.state.tracker}
                 // onTimeRangeChanged={this.handleTimeRangeChange}
                 // onChartResize={width => this.handleChartResize(width)}
-                // onTrackerChanged={this.handleTrackerChanged}
+                onTrackerChanged={this.handleTrackerChanged}
             >
                 {rows}
             </ChartContainer>
         )
 
-        // return (
-        //     <div>This is our chart</div>
-        // )
+    }
+
+    renderBrush() {
+        const { channels } = this.state;
+        return (
+            <ChartContainer
+                timeRange={channels.altitude.series.range()}
+                format="relative"
+                trackerPosition={this.state.tracker}
+            >
+                <ChartRow height="100" debug={false}>
+                    <Brush
+                        timeRange={this.state.brushRange}
+                        allowSelectionClear
+                        onTimeRangeChanged={this.handleTimeRangeChange}
+                    />
+                    <YAxis 
+                        id="axis1"
+                        label="Altitude"
+                        min={0}
+                        max={channels.altitude.max}
+                        width={70}
+                        type="linear"
+                        format="d"
+                    />
+                    <Charts>
+                        <AreaChart 
+                            axis="axis1"
+                            style={style.areaChartStyle()}
+                            columns={{ up: ["altitude"], down: [] }}
+                            series={channels.altitude.series}
+                        />
+                    </Charts>
+                </ChartRow>
+
+            </ChartContainer>
+        )
     }
 
     render() {
@@ -214,6 +293,11 @@ class Graphs extends React.Component {
                 <div className="col-md-12" style={chartStyle}>
                     <Resizable>
                         {ready ? this.renderChart() : <div>Loading</div>}
+                    </Resizable>
+                </div>
+                <div className="row">
+                    <Resizable>
+                        {ready ? this.renderBrush() : <div />}
                     </Resizable>
                 </div>
             </div>

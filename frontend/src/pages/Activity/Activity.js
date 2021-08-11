@@ -42,7 +42,7 @@ class Activity extends React.Component {
                     <div> 
                         <ActivitySummaryComponent data={this.state.summary}/>
                         <LapSummary data={this.state.laps} />
-                        <Chart data={this.state.records} />
+                        {/* <Chart data={this.state.records} /> */}
                         <Graphs data={this.state.records} />
                     </div>
                     :

@@ -473,6 +473,15 @@ func init() {
 
 	conversionMultiplier[UNIT_SECOND] = make(map[Unit_e]float64)
 	conversionMultiplier[UNIT_SECOND][UNIT_SECOND] = 1.0
+
+	conversionMultiplier[UNIT_METERPERSECOND] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_METERPERSECOND][UNIT_METERPERSECOND] = 1.0
+
+	conversionMultiplier[UNIT_COUNT] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_COUNT][UNIT_COUNT] = 1.0
+
+	conversionMultiplier[UNIT_COUNTRATE] = make(map[Unit_e]float64)
+	conversionMultiplier[UNIT_COUNTRATE][UNIT_COUNTRATE] = 1.0
 /* TODO: ...
 
 
