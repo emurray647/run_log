@@ -131,11 +131,28 @@ class Graphs extends React.Component {
             minDuration,
             timerange: initialRange,
             brushrange: initialRange,
+            initialrange: initialRange
         })
 
     } // componentDidMount
 
+    shouldComponentUpdate(nextProps) {
+        // always allow update, but if the focus range has changed, we want to override
+        // wherever it is currently at
+        if (nextProps.highlightRange != this.props.highlightRange) {
+            this.setState({internalTimerange: false})
+        }
+        return true;
+    }
+
     static getDerivedStateFromProps(nextProps, prevState) {
+        console.log(nextProps.highlightRange)
+
+        // early exit if time range is manually set
+        if (prevState.internalTimerange) {
+            return null;
+        }
+
         if (nextProps.highlightRange) {
             const timerange = new TimeRange([
                 nextProps.highlightRange.start_time * 1000,
@@ -144,6 +161,11 @@ class Graphs extends React.Component {
             return {
                 timerange: timerange,
                 brushrange: timerange
+            }
+        } else {
+            return {
+                timerange: prevState.initialrange,
+                brushrange: prevState.initialrange
             }
         }
         return null;
@@ -157,7 +179,7 @@ class Graphs extends React.Component {
         const {channels} = this.state;
 
         if (tr) {
-            this.setState({timerange: tr, brushrange: tr})
+            this.setState({timerange: tr, brushrange: tr, internalTimerange: true})
         }
         else {
             console.error("No time range provided")
@@ -307,9 +329,6 @@ class Graphs extends React.Component {
     }
 
     render() {
-
-        // if (this.props.)
-
         const {ready, channels, displayChannels} = this.state
         if (!ready) {
             return <div>Loading</div>

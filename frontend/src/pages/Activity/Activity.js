@@ -39,19 +39,22 @@ class Activity extends React.Component {
     }
 
     setSelectedLap(index) {
-        console.log("Selected lap " + index);
 
-        console.log(this.state.laps[index].start_time);
-        console.log(this.state.laps[index].end_time);
+        if (index === null) {
+            this.setState({
+                focusedData: null
+            })
+        } else {
+            const start_time = this.state.laps[index].start_time;
+            const end_time = this.state.laps[index].end_time;
+            this.setState({
+                focusedData: {
+                    start_time: start_time,
+                    end_time: end_time
+                }
+            })
+        }
 
-        const start_time = this.state.laps[index].start_time;
-        const end_time = this.state.laps[index].end_time;
-        this.setState({
-            focusedData: {
-                start_time: start_time,
-                end_time: end_time
-            }
-        })
     }
     
     render() {

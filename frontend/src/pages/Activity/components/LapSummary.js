@@ -20,9 +20,11 @@ class LapSummary extends React.Component {
     }
 
     handleClick(index) {
-        this.setState({
-            clicked: index
-        })
+        if (index === this.state.clicked) {
+            index = null;
+        }
+
+        this.setState({clicked: index});
         
         //propagate the call to parent
         this.emit(index);
