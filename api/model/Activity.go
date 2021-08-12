@@ -24,7 +24,9 @@ type ActivityRecord struct {
 }
 
 type ActivityLap struct {
-	Timestamp *float64 `json:"timestamp,omitempty"`
+	// Timestamp *float64 `json:"timestamp,omitempty"`
+	StartTime *float64 `json:"start_time,omitempty"`
+	EndTime   *float64 `json:"end_time,omitempty"`
 	Duration  *float32 `json:"duration,omitempty"`
 	Distance  *float32 `json:"distance,omitempty"`
 	HeartRate *uint    `json:"heartrate,omitempty"`
@@ -33,7 +35,9 @@ type ActivityLap struct {
 
 func newActivityLap() ActivityLap {
 	lap := ActivityLap{}
-	lap.Timestamp = new(float64)
+	// lap.Timestamp = new(float64)
+	lap.StartTime = new(float64)
+	lap.EndTime = new(float64)
 	lap.Duration = new(float32)
 	lap.Distance = new(float32)
 	lap.HeartRate = new(uint)
@@ -61,7 +65,8 @@ func (a *Activity) Marshal(messages []fit.DataMessage) error {
 			activityRecord.PositionLon = new(float32)
 			activityRecord.Speed = new(float32)
 			// *activityRecord.Timestamp = float32(generated.Convert(*record.Timestamp, generated.RECORD_TIMESTAMP_DEFAULT_UNIT, generated.UNIT_SECOND))
-			*activityRecord.Timestamp = float64(*record.Timestamp)
+			// *activityRecord.Timestamp = float64(*record.Timestamp)
+			*activityRecord.Timestamp = float64(correctTime(uint32(*record.Timestamp)) - a.Summary.StartTime)
 			*activityRecord.Distance = float32(generated.Convert(*record.Distance, generated.RECORD_DISTANCE_DEFAULT_UNIT, generated.UNIT_METER))
 			// TODO: need some error check for if fields aren't set
 			// *activityRecord.Elevation = float32(generated.Convert(*record.Altitude, generated.RECORD_ALTITUDE_DEFAULT_UNIT, generated.UNIT_METER))
@@ -80,7 +85,11 @@ func (a *Activity) Marshal(messages []fit.DataMessage) error {
 			lap := messages[i].Data.(*generated.LapDataMessage)
 			activityLap := newActivityLap()
 			// *activityLap.Timestamp = float32(generated.Convert(*lap.Timestamp, generated.LAP_TIMESTAMP_DEFAULT_UNIT, generated.UNIT_SECOND))
-			*activityLap.Timestamp = float64(*lap.Timestamp)
+			// *activityLap.Timestamp = float64(*lap.Timestamp)
+			// *activityLap.StartTime = float64(*lap.StartTime)
+			// *activityLap.EndTime = float64(*lap.Timestamp)
+			*activityLap.StartTime = float64(correctTime(uint32(*lap.StartTime)) - a.Summary.StartTime)
+			*activityLap.EndTime = float64(correctTime(uint32(*lap.Timestamp)) - a.Summary.StartTime)
 			*activityLap.Duration = float32(generated.Convert(*lap.TotalElapsedTime, generated.LAP_TOTAL_ELAPSED_TIME_DEFAULT_UNIT, generated.UNIT_SECOND))
 			*activityLap.Distance = float32(generated.Convert(*lap.TotalDistance, generated.LAP_TOTAL_DISTANCE_DEFAULT_UNIT, generated.UNIT_METER))
 			*activityLap.HeartRate = uint(generated.Convert(*lap.AvgHeartRate, generated.LAP_AVG_HEART_RATE_DEFAULT_UNIT, generated.UNIT_COUNTRATE))

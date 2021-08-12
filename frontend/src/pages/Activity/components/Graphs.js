@@ -105,8 +105,6 @@ class Graphs extends React.Component {
             })
         
             channels[channelName].series = series;
-            // channels[channelName].avg = parseInt(series.avg(channelName), 10)
-            // channels[channelName].max = parseInt(series.max(channelName), 10)
             channels[channelName].avg = parseFloat(series.avg(channelName))
             channels[channelName].max = parseFloat(series.max(channelName))
         
@@ -114,9 +112,16 @@ class Graphs extends React.Component {
 
         const minTime = channels.altitude.series.range().begin();
         const maxTime = channels.altitude.series.range().end();
-        const minDuration = 10 * 60 * 1000;
+        // const minDuration = 10 * 60 * 1000;
+        const minDuration = 0;
 
-        const initialRange = new TimeRange([0, end_time * 1000]);
+        console.log("Setting the range")
+        let initialRange;
+        if (this.props.highlightRange) {
+            initialRange = new TimeRange([this.props.highlightRange.start_time * 1000, this.props.highlightRange.end_time * 1000]);
+        } else {
+            initialRange = new TimeRange([0, end_time * 1000]);
+        }
 
         this.setState({
             ready: true,
@@ -129,6 +134,20 @@ class Graphs extends React.Component {
         })
 
     } // componentDidMount
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.highlightRange) {
+            const timerange = new TimeRange([
+                nextProps.highlightRange.start_time * 1000,
+                nextProps.highlightRange.end_time * 1000
+            ]);
+            return {
+                timerange: timerange,
+                brushrange: timerange
+            }
+        }
+        return null;
+    }
 
     handleTrackerChanged(t) {
         this.setState({tracker: t});
@@ -153,7 +172,7 @@ class Graphs extends React.Component {
     renderChart() {
         const {timerange, displayChannels, channels, maxTime, minTime, minDuration} = this.state;
 
-        const durationPerPixel = timerange.duration() / 800 / 1000;
+        // const durationPerPixel = timerange.duration() / 800 / 1000;
         const rows = [];
 
         for (let channelName of displayChannels) {
@@ -288,6 +307,9 @@ class Graphs extends React.Component {
     }
 
     render() {
+
+        // if (this.props.)
+
         const {ready, channels, displayChannels} = this.state
         if (!ready) {
             return <div>Loading</div>

@@ -36,3 +36,9 @@ func (a *ActivitySummary) Marshal(messages []fit.DataMessage) error {
 
 	return nil
 }
+
+func correctTime(rawTime uint32) uint {
+	t, _ := time.Parse("2006-01-02 15:04:05", "1989-12-31 00:00:00")
+	correctedTime := uint32(t.Unix()) + uint32(rawTime)
+	return uint(correctedTime)
+}

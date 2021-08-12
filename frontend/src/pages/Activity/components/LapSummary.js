@@ -7,22 +7,25 @@ import style from "./LapSummary.css"
 
 class LapSummary extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             clicked: null,
             hovered: null
         }
         this.handleHover = this.handleHover.bind(this);
         this.handleClick = this.handleClick.bind(this);
+
+        this.emit = this.props.setSelectedLap;
     }
 
     handleClick(index) {
-        //propagate the call to parent
-        // ...
         this.setState({
             clicked: index
         })
+        
+        //propagate the call to parent
+        this.emit(index);
     }
 
     handleHover(index) {
