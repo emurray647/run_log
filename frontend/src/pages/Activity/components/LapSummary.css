@@ -1,0 +1,7 @@
+table tr.clicked {
+    background-color: darksalmon;
+}
+
+table tr.hovered {
+    background-color: cornflowerblue;
+}

@@ -2,8 +2,34 @@ import React from "react";
 
 import Preferences from "../../../util/Preferences";
 
+import style from "./LapSummary.css"
+
 
 class LapSummary extends React.Component {
+
+    constructor() {
+        super();
+        this.state = {
+            clicked: null,
+            hovered: null
+        }
+        this.handleHover = this.handleHover.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    handleClick(index) {
+        //propagate the call to parent
+        // ...
+        this.setState({
+            clicked: index
+        })
+    }
+
+    handleHover(index) {
+        this.setState({
+            hovered: index
+        })
+    }
 
     render() {
 
@@ -22,8 +48,18 @@ class LapSummary extends React.Component {
                     </thead>
                     <tbody>
                         {this.props.data.map((lap, index) => {
+                            const classNames = [
+                                this.state.hovered === index ? "hovered" : "",
+                                this.state.clicked === index ? "clicked" : ""
+                            ].join(' ');
                             return (
-                                <tr key="{index}" >
+                                <tr 
+                                    key={index} 
+                                    className={classNames}
+                                    onMouseOver={() => this.handleHover(index)} 
+                                    onClick={() => this.handleClick(index)}
+                                    
+                                >
                                     <td>{index + 1}</td>
                                     <td>{Preferences.instance().displayDuration(lap.duration)}</td>
                                     <td>{Preferences.instance().displayDistance(lap.distance)} {Preferences.instance().getDistanceUnits()}</td>
@@ -37,17 +73,7 @@ class LapSummary extends React.Component {
                 </table>
             </div>
         )
-        // return (
-        //     <div>
-        //         <ul>
-        //             <li>Time: {Preferences.instance().displayDate(this.props.data.start_time)}</li>
-        //             <li>Distance: {Preferences.instance().displayDistance(this.props.data.distance)}</li>
-        //             <li>Duration: {Preferences.instance().displayDuration(this.props.data.duration)}</li>
-        //             <li>Heart Rate: {this.props.data.avg_heart_rate}</li>
-        //             <li>Cadence: {this.props.data.avg_cadence}</li>
-        //         </ul>
-        //     </div>
-        // )
+
     }
 }
 
