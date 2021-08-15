@@ -40,10 +40,7 @@ class MapComponent extends React.Component {
         ]
         console.log(viewPoint)
 
-        viewPoint = fromLonLat(viewPoint)
-        // viewPoint =  Projection.transform(viewPoint, 'EPSG:4326', 'EPSG:3857');
-        
-
+        viewPoint = fromLonLat(viewPoint)      
 
         var map = new Map({
             target: this.mapElement.current,
@@ -53,7 +50,6 @@ class MapComponent extends React.Component {
                 })
             ],
             view: new View({
-                // center: Projection.fromLonLat([37.41, 8.82]),
                 center: viewPoint,
                 zoom: 15
             }),
@@ -67,12 +63,10 @@ class MapComponent extends React.Component {
         polyline.transform('EPSG:4326', 'EPSG:3857');
         const feature = new Feature(polyline);
         const source = new VectorSource(feature);
-        // const source = new VectorLayer(feature);
         source.addFeature(feature);
         const vectorLayer = new VectorLayer({source: source});
 
         map.addLayer(vectorLayer);
-
 
         this.setState({
             map: map,
