@@ -6,6 +6,7 @@ import LapSummary from "./components/LapSummary"
 import UnitConversion from "../../util/UnitConversion"
 import Chart from "./components/Chart"
 import Graphs from "./components/Graphs"
+import MapComponent from "./components/MapComponent"
 
 class Activity extends React.Component {
     
@@ -27,7 +28,6 @@ class Activity extends React.Component {
             this.setState({
                 summary: response.summary,
                 records: response.records,
-                // laps: response.laps.filter(elt => elt.start_time = UnitConversion.instance().convertEpochToDate(elt.start_time))
                 laps: response.laps,
             })
 
@@ -70,6 +70,7 @@ class Activity extends React.Component {
                             // highlightRange={{start_time: this.state.focusedData.start_time, end_time: TouchList.state.focusedData.end_time}}
                             highlightRange={this.state.focusedData ?? undefined}
                         />
+                        <MapComponent data={this.state.records}/>
                     </div>
                     :
                     <h1>Loading</h1>
