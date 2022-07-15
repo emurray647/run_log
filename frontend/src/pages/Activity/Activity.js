@@ -70,7 +70,10 @@ class Activity extends React.Component {
                             // highlightRange={{start_time: this.state.focusedData.start_time, end_time: TouchList.state.focusedData.end_time}}
                             highlightRange={this.state.focusedData ?? undefined}
                         />
-                        <MapComponent data={this.state.records}/>
+                        <MapComponent 
+                            data={this.state.records}
+                            focusTimerange={this.state.focusedData ?? undefined}
+                        />
                     </div>
                     :
                     <h1>Loading</h1>
