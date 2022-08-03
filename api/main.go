@@ -1,27 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"net/http"
+	"time"
 
-	"github.com/emurray647/run_log/core/db"
-	"github.com/emurray647/run_log/network"
+	"github.com/emurray647/run_log/routing"
 )
 
 func main() {
-	fmt.Println("Running")
+	handler, _ := routing.BuildRoutes()
 
-	dbConnection := db.DbConnection{}
-	err := dbConnection.Open()
-	if err != nil {
-		panic(err.Error())
-	}
-	defer dbConnection.Close()
-
-	err = dbConnection.CreateTables()
-	if err != nil {
-		panic(err.Error())
+	srv := &http.Server{
+		Handler:      handler,
+		Addr:         ":8080",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
 	}
 
-	network.HandleRequests(&dbConnection)
-
+	srv.ListenAndServe()
 }

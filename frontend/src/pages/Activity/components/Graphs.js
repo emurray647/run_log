@@ -95,7 +95,8 @@ class Graphs extends React.Component {
             
         }
 
-        console.log(points["speed"])
+        console.log(data)
+        console.log("speed: " + points["speed"])
 
         for (let channelName of this.state.channelNames) {
             const series = new TimeSeries({
@@ -146,7 +147,7 @@ class Graphs extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        console.log(nextProps.highlightRange)
+        // console.log(nextProps.highlightRange)
 
         // early exit if time range is manually set
         if (prevState.internalTimerange) {

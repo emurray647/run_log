@@ -14,8 +14,8 @@ class ActivityList extends React.Component {
     }
 
     componentDidMount() {
-        console.log("component did mount")
-        fetch("http://localhost:8080/api/v1/activities")
+        console.log("***component did mount")
+        fetch("http://localhost:8080/api/v1/users/1/activities")
         .then(response => response.json())
         .then(response => {
             console.log("length: " + response.length)
@@ -58,6 +58,7 @@ class ActivityList extends React.Component {
 
     render() {
         this.state.activities.forEach(act => console.log(act.id))
+        console.log(this.state.activities);
         return (
             <div>
                 <table class="table">

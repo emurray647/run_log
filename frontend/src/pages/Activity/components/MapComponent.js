@@ -37,10 +37,10 @@ class MapComponent extends React.Component {
     componentDidMount() {
 
         let viewPoint = [
-            this.props.data[0].position_longitude,
-            this.props.data[0].position_latitude,
+            this.props.data[0].position.longitude,
+            this.props.data[0].position.latitude,
         ]
-        // console.log(viewPoint)
+        console.log(viewPoint)
 
         viewPoint = fromLonLat(viewPoint)      
 
@@ -93,8 +93,8 @@ class MapComponent extends React.Component {
         if (map) {
 
             let viewPoint = [
-                nextProps.data[0].position_longitude,
-                nextProps.data[0].position_latitude,
+                nextProps.data[0].position.longitude,
+                nextProps.data[0].position.latitude,
             ];
 
             viewPoint = fromLonLat(viewPoint)   
@@ -109,7 +109,7 @@ class MapComponent extends React.Component {
             }
 
             const points = nextProps.data.map(point => {
-                return [point.position_longitude, point.position_latitude];
+                return [point.position.longitude, point.position.latitude];
             })
     
             const polyline = new LineString(points);
@@ -132,7 +132,7 @@ class MapComponent extends React.Component {
             const focusPoints = nextProps.data.filter(point => {
                 return point.timestamp >= start_time && point.timestamp <= end_time;
             }).map(point => {
-                return [point.position_longitude, point.position_latitude];
+                return [point.position.longitude, point.position.latitude];
             });
             
             // const focusPoints = nextProps.data.map(point => {

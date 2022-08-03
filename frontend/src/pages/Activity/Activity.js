@@ -21,7 +21,8 @@ class Activity extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:8080/api/v1/activities/" + this.state.activity_id)
+        // fetch("http://localhost:8080/api/v1/activities/" + this.state.activity_id)
+        fetch("http://localhost:8080/api/v1/users/1/activities/" + this.state.activity_id)
         .then(response => response.json())
         .then(response => {
             response.summary.start_time = UnitConversion.instance().convertEpochToDate(response.summary.start_time)
@@ -58,6 +59,7 @@ class Activity extends React.Component {
     }
     
     render() {
+        console.log(this.state.records)
         return (
             <div>
                 {this.state.loaded ? 

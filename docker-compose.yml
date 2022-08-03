@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  run-log-api:
+    build:
+      context: ./api/
+
+    volumes:
+      - "$PWD/api:/go/api"
+
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    networks:
+      - gateway
+
+  run-log-db:
+    image: mysql:5.7
+    environment:
+      - "MYSQL_DATABASE=run_log_db"
+      - "MYSQL_USER=user"
+      - "MYSQL_PASSWORD=password"
+      - "MYSQL_ROOT_PASSWORD=root"
+
+    hostname: db
+    restart: always
+
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+
+    volumes:
+      # - ./api/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db-data:/var/lib/mysql
+      - ./api/db-data/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - gateway
+
+volumes:
+  db-data:
+
+networks:
+  gateway: 
+    driver: bridge

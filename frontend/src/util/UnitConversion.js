@@ -14,7 +14,6 @@ class UnitConversion {
     }
 
     convertDuration(input) {
-        console.log(input)
         let hours = Math.floor(input / (60 * 60))
         input -= hours * (60 * 60)
 
