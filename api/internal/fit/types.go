@@ -1,6 +1,6 @@
 package fit
 
-import "github.com/emurray647/run_log/core/format/fit/generated"
+import "github.com/emurray647/run_log/internal/fit/generated"
 
 type Header struct {
 	size            uint8
