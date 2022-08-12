@@ -8,6 +8,8 @@ import Chart from "./components/Chart"
 import Graphs from "./components/Graphs"
 import MapComponent from "./components/MapComponent"
 
+import apiCall from "../../util/Api"
+
 class Activity extends React.Component {
     
     constructor(props) {
@@ -21,9 +23,7 @@ class Activity extends React.Component {
     }
 
     componentDidMount() {
-        // fetch("http://localhost:8080/api/v1/activities/" + this.state.activity_id)
-        fetch("http://localhost:8080/api/v1/users/1/activities/" + this.state.activity_id)
-        .then(response => response.json())
+        apiCall("http://localhost:8080/api/v1/users/1/activities/" + this.state.activity_id)
         .then(response => {
             response.summary.start_time = UnitConversion.instance().convertEpochToDate(response.summary.start_time)
             this.setState({

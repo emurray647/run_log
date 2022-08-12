@@ -1,4 +1,5 @@
 import React from "react"
+import apiCall from "../../util/Api"
 
 import Preferences from "../../util/Preferences"
 import UnitConversion from "../../util/UnitConversion"
@@ -15,8 +16,9 @@ class ActivityList extends React.Component {
 
     componentDidMount() {
         console.log("***component did mount")
-        fetch("http://localhost:8080/api/v1/users/1/activities")
-        .then(response => response.json())
+        // fetch("http://localhost:8080/api/v1/users/1/activities")
+        // .then(response => response.json())
+        apiCall("http://localhost:8080/api/v1/users/1/activities")
         .then(response => {
             console.log("length: " + response.length)
             console.log(response)

@@ -17,6 +17,8 @@ type ActivitySummary struct {
 	TotalDistance float32 `json:"distance,omitempty"`
 	AvgHeartRate  uint8   `json:"avg_heart_rate,omitempty"`
 	AvgCadence    uint8   `json:"avg_cadence,omitempty"`
+	Ascent        float32 `json:"ascent,omitempty"`
+	Descent       float32 `json:"descent,omitempty"`
 }
 
 type Activity struct {
@@ -64,14 +66,16 @@ func (a *Activity) DBWrite(rc request.RequestContext) (int64, error) {
 		return 0, err
 	}
 
-	queryString := fmt.Sprintf("INSERT INTO %s (user_id, start_time, total_time, total_distance, avg_heart_rate, avg_cadence, records, laps) "+
-		"VALUES(?,?,?,?,?,?,?,?)", "activities")
+	queryString := fmt.Sprintf("INSERT INTO %s "+
+		"(user_id, start_time, total_time, total_distance, avg_heart_rate, avg_cadence, ascent, descent, records, laps) "+
+		"VALUES(?,?,?,?,?,?,?,?,?,?)", "activities")
 	stmt, err := db.Prepare(queryString)
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := stmt.Exec(a.UserID, a.StartTime, a.TotalTime, a.TotalDistance, a.AvgHeartRate, a.AvgCadence, a.Records.Marshal(), a.Laps.Marshal())
+	res, err := stmt.Exec(a.UserID, a.StartTime, a.TotalTime, a.TotalDistance, a.AvgHeartRate, a.AvgCadence,
+		a.Ascent, a.Descent, a.Records.Marshal(), a.Laps.Marshal())
 	if err != nil {
 		return 0, err
 	}
@@ -152,13 +156,10 @@ func (a *Activity) DBReadActivity(rc request.RequestContext, activityID uint) er
 	// probably need len stored in db too
 	var recordsBuffer []byte
 	var lapsBuffer []byte
-	row.Scan(&a.ID, &a.StartTime, &a.TotalTime, &a.TotalDistance, &a.AvgHeartRate, &a.AvgCadence, &recordsBuffer, &lapsBuffer)
-
-	fmt.Printf("id: %d\n", a.ID)
-	fmt.Printf("recrods: %d\n", len(recordsBuffer))
-	fmt.Println(recordsBuffer[:16])
-	fmt.Printf("laps: %d\n", len(lapsBuffer))
-	fmt.Println(lapsBuffer[:16])
+	err = row.Scan(&a.ID, &a.StartTime, &a.TotalTime, &a.TotalDistance, &a.AvgHeartRate, &a.AvgCadence, &recordsBuffer, &lapsBuffer)
+	if err != nil {
+		return fmt.Errorf("could not scan for row with id=%d: %w", activityID, err)
+	}
 
 	err = a.Records.Unmarshal(recordsBuffer)
 	if err != nil {

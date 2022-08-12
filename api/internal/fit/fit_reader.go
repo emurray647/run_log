@@ -84,9 +84,7 @@ func (fr *FitReader) Read(r io.Reader, opts ...func(DataMessage) bool) []model.A
 		}
 
 		if msg.GlobalMessageNum == generated.LapDataMessageID {
-			fmt.Println("adding lap")
 			activity.Laps = append(activity.Laps, *convertToActivityLap(msg.Data.(*generated.LapDataMessage), &activity.ActivitySummary))
-			fmt.Printf("num laps: %d\n", len(activity.Laps))
 		}
 	}
 
